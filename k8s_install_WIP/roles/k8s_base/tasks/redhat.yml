@@ -1,0 +1,51 @@
+---
+# file: roles/k8s_base/tasks/redhat.yml
+
+
+- name: Add a firewall rule for port 10250
+  firewalld:
+    port: 10250/tcp
+    permanent: true
+    state: enabled
+
+- name: Add a firewall rule for port 10255
+  firewalld:
+    port: 10255/tcp
+    permanent: true
+    state: enabled
+
+- name: Install Docker from Repository
+  yum: name=docker state=present
+  notify: restart docker
+
+- name: Add Ansible yum repository
+  yum_repository:
+    name: kubernetes
+    description: Kubernetes Repository
+    file: kubernetes.repo
+    baseurl: https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+    mirrorlist: http://mirrorlist.repoforge.org/el7/mirrors-rpmforge
+    enabled: yes
+    gpgkey: https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+    repo_gpgcheck: no
+    gpgcheck: no
+
+- rpm_key:
+    state: present
+    key: "{{item}}"
+  with_items:
+    - https://packages.cloud.google.com/yum/doc/yum-key.gpg
+    - https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
+
+- name: Disable SELinux
+  selinux:
+    state: disabled
+
+- name: Install kubernetes packages
+  yum: name={{item}} state=present disable_gpg_check=True
+  with_items:
+    - kubelet
+    - kubeadm
+    - kubectl
+  notify: restart kubectl
+

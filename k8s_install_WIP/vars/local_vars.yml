@@ -1,0 +1,5 @@
+---
+# file: vars/local_vars.yml
+[defaults]
+ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+host_key_checking: false

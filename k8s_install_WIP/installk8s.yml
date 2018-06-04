@@ -1,0 +1,30 @@
+---
+# file: installk8s.yml
+
+- name: Install Masters
+  hosts: k8smasters
+
+  vars_files:
+    - [vars/local_vars.yml]
+
+  become: yes
+  become_user: root
+  become_method: sudo
+  
+  roles:
+    - k8s_base
+    - k8s_master
+
+- name: Install Nodes
+  hosts: k8snodes
+
+  vars_files:
+    - [vars/local_vars.yml]
+
+  become: yes
+  become_user: root
+  become_method: sudo
+
+  roles:
+    - k8s_base
+    - k8s_node

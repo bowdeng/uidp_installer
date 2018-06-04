@@ -1,0 +1,44 @@
+# Create the deployment for the Environment Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uidp-cp-environment-service
+  namespace: uidp-dev
+  labels:
+    app: uidp-cp-environment-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uidp-cp-environment-service
+  template:
+    metadata:
+      name: uidp-cp-environment-service
+      labels:
+        app: uidp-cp-environment-service
+    spec:
+      containers:
+      - name: uidp-cp-environment-service
+        image: uidpreg.azurecr.io/uidp-cp-environment-service:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8102
+      imagePullSecrets:
+      - name: azregcred
+---
+# Build Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: uidp-cp-environment-service
+  labels:
+    app: uidp-cp-environment-service
+  namespace: uidp-dev
+spec:
+  selector:
+    app: uidp-cp-environment-service
+  ports:
+  - protocol: TCP
+    port: 8102
+    targetPort: 8102
+  type: LoadBalancer

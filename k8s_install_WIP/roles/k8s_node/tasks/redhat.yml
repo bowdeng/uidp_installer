@@ -1,0 +1,10 @@
+---
+# file: roles/k8s_node/tasks/redhat.yml
+
+
+- name: Add a firewall rule for port 6443
+  firewalld:
+    port: 30000-32767/tcp
+    permanent: true
+    state: enabled
+

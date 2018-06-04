@@ -1,0 +1,90 @@
+# Create the persistent volume to be used for build data
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-build
+  namespace: uidp-dev
+  labels:
+    app: uidp-cp-build-service
+    type: local
+    name: pv-build
+spec:
+  storageClassName: standard
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/volbuild
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: pvc-build
+  namespace: uidp-dev
+  labels:
+    type: local
+    name: pvc-build
+    app: uidp-cp-build-service
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: pv-build
+---
+# Create the deployment for the Build Service that passesin the POSTGRES_USER environment variables
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uidp-cp-build-service
+  namespace: uidp-dev
+  labels:
+    app: uidp-cp-build-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uidp-cp-build-service
+  template:
+    metadata:
+      name: uidp-cp-build-service
+      labels:
+        app: uidp-cp-build-service
+    spec:
+      volumes:
+      - name: buildvol
+        persistentVolumeClaim:
+          claimName: pvc-build
+      containers:
+      - name: uidp-cp-build-service
+        image: uidpreg.azurecr.io/uidp-cp-build-service:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8110
+        volumeMounts:
+        - name: buildvol
+          mountPath: /builddata
+      imagePullSecrets:
+      - name: azregcred
+---
+# Build Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: uidp-cp-build-service
+  labels:
+    app: uidp-cp-build-service
+  namespace: uidp-dev
+spec:
+  ports:
+  - port: 8110
+    targetPort: 8110
+  selector:
+    app: uidp-cp-build-service
+  ports:
+  - protocol: TCP
+    port: 8110
+    targetPort: 8110
+  type: LoadBalancer
