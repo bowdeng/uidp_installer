@@ -1,0 +1,2 @@
+releaseTag: v1
+cloudType: azure  # [ local, azure, aws ]
