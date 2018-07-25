@@ -1,0 +1,165 @@
+---
+# Keycloak admin password
+apiVersion: v1
+kind: Secret
+metadata:
+  name: keycloak
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: uidp
+    component: keycloak
+data:
+  admin_password: "bGV0bWVpbjEyMw=="
+---
+# Keycloak admin user
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: uidp
+    component: keycloak
+data:
+  admin_user: "uidp"
+---
+# SERVICES #
+---
+# Keycloak Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  labels:
+    app: uidp
+    component: keycloak
+  namespace: {{ .Release.Namespace }}
+spec:
+  ports:
+  - port: 8080
+    targetPort: 8080
+  selector:
+    app: uidp
+    component: keycloak
+  ports:
+  - protocol: TCP
+    port: 8080
+    targetPort: 8080
+---
+# Auth proxy service
+apiVersion: v1
+kind: Service
+metadata:
+  name: uidp-cp-auth-proxy
+  labels:
+    app: uidp
+    component: uidp-cp-auth-proxy
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    getambassador.io/config: |
+      ---
+      apiVersion: ambassador/v0
+      kind:  Mapping
+      name:  authproxy-mapping
+      prefix: /auth/
+      rewrite: /auth/
+      service: uidp-cp-auth-proxy:8080
+      cors:
+        origins: "*"
+        headers: Content-Type, Authorization, Accept
+spec:
+  selector:
+    app: uidp
+    component: uidp-cp-auth-proxy
+  ports:
+  - protocol: TCP
+    name: auth-proxy
+    port: 8080
+    targetPort: 8080
+---
+# Keycloak Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: keycloak
+  labels:
+    app: uidp
+    component: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uidp
+      component: keycloak
+  template:
+    metadata:
+      name: keycloak
+      labels:
+        name: keycloak
+        app: uidp
+        component: keycloak
+    spec:
+      imagePullSecrets:
+      - name: regcred-{{ .Release.Name }}
+      containers:
+        - image: uidpreg.azurecr.io/uidp-keycloak:v1
+          name: keycloak
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 100m
+              memory: 512Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          env:
+            - name: KEYCLOAK_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: keycloak
+                  key: admin_user
+            - name: KEYCLOAK_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak
+                  key: admin_password
+            - name: PROXY_ADDRESS_FORWARDING
+              value: "true"
+            - name: DB_VENDOR
+              value: H2
+          ports:
+            - containerPort: 8080
+              name: http
+---
+# Auth proxy deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uidp-cp-auth-proxy
+  namespace: {{ .Release.Namespace }}
+  labels:
+    component: uidp-cp-auth-proxy
+    app: uidp  
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: uidp-cp-auth-proxy
+      app: uidp
+  template:
+    metadata:
+      name: uidp-cp-auth-proxy
+      labels:
+        component: uidp-cp-auth-proxy 
+        app: uidp
+    spec:
+      containers:
+      - name: uidp-cp-auth-proxy
+        image: uidpreg.azurecr.io/uidp-cp-auth-proxy:{{ .Values.releaseTag }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+      imagePullSecrets:
+      - name: regcred-{{ .Release.Name }}
+---

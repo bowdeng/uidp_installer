@@ -1,0 +1,58 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: environment-service
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    getambassador.io/config: |
+      ---
+      apiVersion: ambassador/v0
+      kind:  Mapping
+      name:  environment-mapping
+      prefix: /env/api/v1/
+      rewrite: /api/v1/
+      service: environment-service:8102
+      cors:
+        origins: "*"
+        headers: Content-Type, Authorization, Accept
+spec:
+  selector:
+    app: uidp
+    component: uidp-cp-environment-service
+  ports:
+  - protocol: TCP
+    name: environment-service
+    port: 8102
+    targetPort: 8102
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uidp-cp-environment-service
+  namespace: {{ .Release.Namespace }}
+  labels:
+    component: uidp-cp-environment-service
+    app: uidp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: uidp-cp-environment-service
+      app: uidp
+  template:
+    metadata:
+      name: uidp-cp-environment-service
+      labels:
+        component: uidp-cp-environment-service
+        app: uidp
+    spec:
+      containers:
+      - name: uidp-cp-environment-service
+        image: uidpreg.azurecr.io/uidp-cp-environment-service:{{ .Values.releaseTag }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8102
+      imagePullSecrets:
+      - name: regcred-{{ .Release.Name }}
+---

@@ -1,2 +1,4 @@
 releaseTag: v1
-cloudType: azure  # [ local, azure, aws ]
+cloudType: gcp  # [ local, azure, aws, gcp ]
+portType: LoadBalancer  # [ LoadBalancer, NodePort ]
+RBAC: true

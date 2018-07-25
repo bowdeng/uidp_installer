@@ -1,0 +1,59 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: build-service
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    getambassador.io/config: |
+      ---
+      apiVersion: ambassador/v0
+      kind:  Mapping
+      name:  build-mapping
+      prefix: /bld/api/v1/
+      rewrite: /api/v1/
+      service: build-service:8110
+      cors:
+        origins: "*"
+        headers: Content-Type, Authorization, Accept
+spec:
+  selector:
+    app: uidp
+    component: uidp-cp-build-service
+  ports:
+  - protocol: TCP
+    name: build-service
+    port: 8110
+    targetPort: 8110
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uidp-cp-build-service
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: uidp
+    component: uidp-cp-build-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: uidp-cp-build-service
+      app: uidp
+  template:
+    metadata:
+      name: uidp-cp-build-service
+      labels:
+        component: uidp-cp-build-service
+        app: uidp
+    spec:
+      serviceAccountName: uidp
+      containers:
+      - name: uidp-cp-build-service
+        image: uidpreg.azurecr.io/uidp-cp-build-service:{{ .Values.releaseTag }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8110
+      imagePullSecrets:
+      - name: regcred-{{ .Release.Name }}
+---

@@ -1,0 +1,59 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: usecase-service
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    getambassador.io/config: |
+      ---
+      apiVersion: ambassador/v0
+      kind:  Mapping
+      name:  usecase-mapping
+      prefix: /uc/api/v1/
+      rewrite: /api/v1/
+      service: usecase-service:8101
+      cors:
+        origins: "*"
+        headers: Content-Type, Authorization, Accept
+spec:
+  selector:
+    app: uidp
+    component: uidp-cp-usecase-service
+  ports:
+  - protocol: TCP
+    name: usecase-service
+    port: 8101
+    targetPort: 8101
+---
+# Use case service deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uidp-cp-usecase-service
+  namespace: {{ .Release.Namespace }}
+  labels:
+    component: uidp-cp-usecase-service
+    app: uidp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: uidp-cp-usecase-service
+      app: uidp
+  template:
+    metadata:
+      name: uidp-cp-usecase-service
+      labels:
+        component: uidp-cp-usecase-service
+        app: uidp
+    spec:
+      containers:
+      - name: uidp-cp-usecase-service
+        image: uidpreg.azurecr.io/uidp-cp-usecase-service:{{ .Values.releaseTag }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8101
+      imagePullSecrets:
+      - name: regcred-{{ .Release.Name }}
+---
