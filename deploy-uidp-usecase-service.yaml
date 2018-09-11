@@ -1,5 +1,5 @@
 # Create the deployment for the Build Service that passesin the POSTGRES_USER environment variables
-apiVersion: apps/v1
+apiVersion: apps/v2
 kind: Deployment
 metadata:
   name: uidp-cp-usecase-service
@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
       - name: uidp-cp-usecase-service
-        image: uidpreg.azurecr.io/uidp-cp-usecase-service:v1
+        image: uidpreg.azurecr.io/uidp-cp-usecase-service:v2
         imagePullPolicy: Always
         ports:
         - containerPort: 8101
@@ -27,7 +27,7 @@ spec:
       - name: azregcred
 ---
 # Build Service
-apiVersion: v1
+apiVersion: v2
 kind: Service
 metadata:
   name: uidp-cp-usecase-service
