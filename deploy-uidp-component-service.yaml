@@ -1,0 +1,44 @@
+# Create the deployment for the component Service
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uidp-cp-component-service
+  namespace: uidp-dev
+  labels:
+    app: uidp-cp-component-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uidp-cp-component-service
+  template:
+    metadata:
+      name: uidp-cp-component-service
+      labels:
+        app: uidp-cp-component-service
+    spec:
+      containers:
+      - name: uidp-cp-component-service
+        image: uidpreg.azurecr.io/uidp-cp-component-service:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8103
+      imagePullSecrets:
+      - name: azregcred
+---
+# Build Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: uidp-cp-component-service
+  labels:
+    app: uidp-cp-component-service
+  namespace: uidp-dev
+spec:
+  selector:
+    app: uidp-cp-component-service
+  ports:
+  - protocol: TCP
+    port: 8103
+    targetPort: 8103
+  type: LoadBalancer
