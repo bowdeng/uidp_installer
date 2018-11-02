@@ -100,10 +100,12 @@ spec:
         app: uidp
         component: keycloak
     spec:
+      {{ if .Values.oneai.secureRegistry -}}
       imagePullSecrets:
       - name: regcred-{{ .Release.Name }}
+      {{- end }}
       containers:
-        - image: uidpreg.azurecr.io/uidp-keycloak:v1
+        - image: {{ .Values.oneai.releaseRepository }}/uidp-keycloak:{{ .Values.oneai.releaseTag }}
           name: keycloak
           imagePullPolicy: Always
           resources:
@@ -156,10 +158,12 @@ spec:
     spec:
       containers:
       - name: uidp-cp-auth-proxy
-        image: uidpreg.azurecr.io/uidp-cp-auth-proxy:{{ .Values.releaseTag }}
+        image: {{ .Values.oneai.releaseRepository }}/uidp-cp-auth-proxy:{{ .Values.oneai.releaseTag }}
         imagePullPolicy: Always
         ports:
         - containerPort: 8080
+      {{ if .Values.oneai.secureRegistry -}}
       imagePullSecrets:
       - name: regcred-{{ .Release.Name }}
+      {{- end }}
 ---

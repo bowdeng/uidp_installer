@@ -1,0 +1,9 @@
+dependancies:
+  - name: immuta
+    repository: https://download.immuta.com/archives/charts
+    version: 3.0.10
+    condition: immuta.install
+  - name: metallb
+    repository: https://kubernetes-charts.storage.googleapis.com
+    version: 0.8.0
+    condition: metallb.install

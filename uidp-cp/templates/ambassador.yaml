@@ -21,7 +21,7 @@ metadata:
   name: ambassador
   namespace: {{ .Release.Namespace }}  
 spec:
-  type: {{ .Values.portType }}
+  type: {{ .Values.oneai.portType }}
   ports:
    - port: 80
      name: http
@@ -44,7 +44,7 @@ spec:
       labels:
         service: ambassador
     spec:
-      serviceAccountName: uidp
+      serviceAccountName: {{ .Values.rbac.serviceAccounts.oneai.name }}
       containers:
       - name: ambassador
         image: quay.io/datawire/ambassador:0.34.1

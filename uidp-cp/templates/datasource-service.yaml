@@ -2,57 +2,58 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: environment-service
+  name: datasource-service
   namespace: {{ .Release.Namespace }}
   annotations:
     getambassador.io/config: |
       ---
       apiVersion: ambassador/v0
       kind:  Mapping
-      name:  environment-mapping
-      prefix: /env/api/v1/
+      name:  datasource-mapping
+      prefix: /datasource/api/v1/
       rewrite: /api/v1/
-      service: environment-service:8102
+      service: datasource-service:8101
       cors:
         origins: "*"
         headers: Content-Type, Authorization, Accept
 spec:
   selector:
     app: uidp
-    component: uidp-cp-environment-service
+    component: uidp-cp-datasource-service
   ports:
   - protocol: TCP
-    name: environment-service
-    port: 8102
-    targetPort: 8102
+    name: datasource-service
+    port: 8104
+    targetPort: 8104
 ---
+# Use case service deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: uidp-cp-environment-service
+  name: uidp-cp-datasource-service
   namespace: {{ .Release.Namespace }}
   labels:
-    component: uidp-cp-environment-service
+    component: uidp-cp-datasource-service
     app: uidp
 spec:
   replicas: 1
   selector:
     matchLabels:
-      component: uidp-cp-environment-service
+      component: uidp-cp-datasource-service
       app: uidp
   template:
     metadata:
-      name: uidp-cp-environment-service
+      name: uidp-cp-datasource-service
       labels:
-        component: uidp-cp-environment-service
+        component: uidp-cp-datasource-service
         app: uidp
     spec:
       containers:
-      - name: uidp-cp-environment-service
-        image: {{ .Values.oneai.releaseRepository }}/uidp-cp-environment-service:{{ .Values.oneai.releaseTag }}
+      - name: uidp-cp-datasource-service
+        image: {{ .Values.oneai.releaseRepository }}/uidp-cp-datasource-service:{{ .Values.oneai.releaseTag }}
         imagePullPolicy: Always
         ports:
-        - containerPort: 8102
+        - containerPort: 8104
       {{ if .Values.oneai.secureRegistry -}}
       imagePullSecrets:
       - name: regcred-{{ .Release.Name }}

@@ -10,7 +10,7 @@ metadata:
 spec:
   selector:
     app: uidp-ui
-  type: {{ .Values.portType }}
+  type: {{ .Values.oneai.portType }}
   ports:
   - port: 80
     targetPort: 80
@@ -42,13 +42,15 @@ spec:
     spec:
       containers:
       - name: uidp-ui
-        image: uidpreg.azurecr.io/uidp-ui:{{ .Values.releaseTag }}
+        image: {{ .Values.oneai.releaseRepository }}/uidp-ui:{{ .Values.oneai.releaseTag }}
         imagePullPolicy: Always
         ports:
         - containerPort: 80
         - containerPort: 443
         - containerPort: 3000
+      {{ if .Values.oneai.secureRegistry -}}
       imagePullSecrets:
       - name: regcred-{{ .Release.Name }}
-      serviceAccountName: uidp
+      {{- end }}
+      serviceAccountName: {{ .Values.rbac.serviceAccounts.oneai.name }}
 

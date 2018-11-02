@@ -50,10 +50,12 @@ spec:
     spec:
       containers:
       - name: uidp-cp-usecase-service
-        image: uidpreg.azurecr.io/uidp-cp-usecase-service:{{ .Values.releaseTag }}
+        image: {{ .Values.oneai.releaseRepository }}/uidp-cp-usecase-service:{{ .Values.oneai.releaseTag }}
         imagePullPolicy: Always
         ports:
         - containerPort: 8101
+      {{ if .Values.oneai.secureRegistry -}}
       imagePullSecrets:
       - name: regcred-{{ .Release.Name }}
+      {{- end }}
 ---

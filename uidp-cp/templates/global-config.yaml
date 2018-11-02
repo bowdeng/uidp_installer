@@ -1,3 +1,4 @@
+{{ if .Values.oneai.secureRegistry -}}
 ---
 # Docker Registry Credentials
 apiVersion: v1
@@ -10,5 +11,5 @@ metadata:
     name: regcred-{{ .Release.Name }}
 type: kubernetes.io/dockerconfigjson
 data:
-  .dockerconfigjson: "eyJhdXRocyI6eyJ1aWRwcmVnLmF6dXJlY3IuaW8iOnsidXNlcm5hbWUiOiJ1aWRwcmVnIiwicGFzc3dvcmQiOiJLaGZEdD1FPUcwOStQWGtoSW9CV2xXWkQ1MlBLR2VUcCIsImVtYWlsIjoiZ2x5bi5ib3dkZW5AaHBlLmNvbSIsImF1dGgiOiJkV2xrY0hKbFp6cExhR1pFZEQxRlBVY3dPU3RRV0d0b1NXOUNWMnhYV2tRMU1sQkxSMlZVY0E9PSJ9fX0="
+  .dockerconfigjson: {{ .Values.oneai.registryKey }}
 ---
