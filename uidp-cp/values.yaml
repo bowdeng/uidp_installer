@@ -10,15 +10,15 @@ rbac:
   create: false
   serviceAccounts:
     oneai:
-      - name: sa-oneai
+      name: sa-oneai
 
   roles:
     oneai:
-      - name: r-oneai
+      name: r-oneai
 
   roleBindings:
     oneai:
-      - name: cr-oneai
+      name: cr-oneai
 
 metallb:
   install: false

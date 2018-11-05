@@ -26,7 +26,7 @@ spec:
     port: 8110
     targetPort: 8110
 ---
-apiVersion: apps/v1
+apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: uidp-cp-build-service
