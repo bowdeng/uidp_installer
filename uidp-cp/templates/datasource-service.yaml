@@ -10,7 +10,7 @@ metadata:
       apiVersion: ambassador/v0
       kind:  Mapping
       name:  datasource-mapping
-      prefix: /datasource/api/v1/
+      prefix: /dts/api/v1/
       rewrite: /api/v1/
       service: datasource-service:8101
       cors:
