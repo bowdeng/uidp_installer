@@ -4,13 +4,24 @@ apiVersion: v1
 kind: Service
 metadata:
   name: uidp-ui
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    getambassador.io/config: |
+      ---
+      apiVersion: ambassador/v0
+      kind:  Mapping
+      name:  build-mapping
+      prefix: /ui/
+      rewrite: /
+      service: ui-service:80
+      cors:
+        origins: "*"
+        headers: Content-Type, Authorization, Accept
   labels:
     app: uidp-ui
-  namespace: {{ .Release.Namespace }}
 spec:
   selector:
     app: uidp-ui
-  type: {{ .Values.oneai.portType }}
   ports:
   - port: 80
     targetPort: 80
