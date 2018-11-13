@@ -33,7 +33,7 @@ spec:
         - name: SELDON_ENGINE_KAFKA_SERVER
           value: kafka:9092
         - name: SELDON_CLUSTER_MANAGER_REDIS_HOST
-          value: {{ .Release.Name }}-redis
+          value: redis-master
         - name: SELDON_CLUSTER_MANAGER_POD_NAMESPACE
           valueFrom:
             fieldRef:
@@ -75,6 +75,18 @@ metadata:
     app.kubernetes.io/component: seldon-core-apiserver
     app: seldon-apiserver-container-app
   name: {{ .Release.Name }}-seldon-apiserver
+  annotations:
+    getambassador.io/config: |
+      ---
+      apiVersion: ambassador/v0
+      kind:  Mapping
+      name:  seldon-api-mapping
+      prefix: /seldon
+      rewrite: /
+      service: seldon-service:8080
+      cors:
+        origins: "*"
+        headers: Content-Type, Authorization, Accept
 spec:
   ports:
   - name: http
@@ -88,7 +100,6 @@ spec:
   selector:
     app: seldon-apiserver-container-app
   sessionAffinity: None
-  type: {{ .Values.seldon.apife.service_type }}
 status:
   loadBalancer: {}
 {{- end }}
