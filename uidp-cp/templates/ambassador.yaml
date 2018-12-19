@@ -75,5 +75,5 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 3
       - name: statsd
-        image: quay.io/datawire/statsd:0.34.1
+        image: {{ .Values.oneai.releaseRepository }}/uidp-statsd:{{ .Values.oneai.releaseTag }}
       restartPolicy: Always
