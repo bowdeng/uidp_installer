@@ -1,3 +1,4 @@
+{{- if .Values.seldon.install }}
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -51,3 +52,4 @@ spec:
         - containerPort: 8080
           protocol: TCP
       terminationGracePeriodSeconds: 1
+{{- end }}

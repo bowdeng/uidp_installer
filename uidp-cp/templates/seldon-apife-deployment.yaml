@@ -1,3 +1,4 @@
+{{- if .Values.seldon.install }}
 {{- if .Values.seldon.apife.enabled }}
 ---
 apiVersion: apps/v1beta1
@@ -102,4 +103,5 @@ spec:
   sessionAffinity: None
 status:
   loadBalancer: {}
+{{- end }}
 {{- end }}

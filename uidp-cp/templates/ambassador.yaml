@@ -47,7 +47,7 @@ spec:
       serviceAccountName: {{ .Values.rbac.serviceAccounts.oneai.name }}
       containers:
       - name: ambassador
-        image: quay.io/datawire/ambassador:0.34.1
+        image: {{ .Values.oneai.releaseRepository }}/uidp-ambassador:{{ .Values.oneai.releaseTag }}
         resources:
           limits:
             cpu: 1
