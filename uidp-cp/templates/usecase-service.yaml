@@ -55,7 +55,40 @@ spec:
         ports:
         - containerPort: 8101
       {{ if .Values.oneai.secureRegistry -}}
+      env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: uidp-postgres-credentials
+              key: user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: uidp-postgres-credentials
       imagePullSecrets:
       - name: regcred-{{ .Release.Name }}
       {{- end }}
 ---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "uidp-usecase-init"
+  labels:
+    helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-weight": "-5"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      name: "uidp-usecase-init"
+      labels:
+        helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    spec:
+      restartPolicy: Never
+      containers:
+      - name: usecase-post-install-job
+        image: {{ .Values.oneai.releaseRepository }}/uidp-cp-usecase-service:{{ .Values.oneai.releaseTag }}
+        imagePullPolicy: Always
+        command: ["/app/init.sh"]

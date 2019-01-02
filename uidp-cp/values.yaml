@@ -3,11 +3,11 @@ oneai:
   registryKey: "eyJhdXRocyI6eyJ1aWRwcmVnLmF6dXJlY3IuaW8iOnsidXNlcm5hbWUiOiJ1aWRwcmVnIiwicGFzc3dvcmQiOiJLaGZEdD1FPUcwOStQWGtoSW9CV2xXWkQ1MlBLR2VUcCIsImVtYWlsIjoiZ2x5bi5ib3dkZW5AaHBlLmNvbSIsImF1dGgiOiJkV2xrY0hKbFp6cExhR1pFZEQxRlBVY3dPU3RRV0d0b1NXOUNWMnhYV2tRMU1sQkxSMlZVY0E9PSJ9fX0="
   releaseRepository: uidpreg.azurecr.io
   releaseTag: v2
-  cloudType: local  # [ local, azure, aws, gcp ]
+  cloudType: azure  # [ local, azure, aws, gcp ]
   portType: LoadBalancer  # [ LoadBalancer, NodePort ]
 
 rbac:
-  create: false
+  create: true
   serviceAccounts:
     oneai:
       name: sa-oneai
@@ -30,7 +30,7 @@ immuta:
   valuesFile: immuta-values.yml
 
 seldon:
-  install: true
+  install: false
 
   apife:
     annotations: null

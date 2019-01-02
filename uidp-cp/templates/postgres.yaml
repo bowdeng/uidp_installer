@@ -1,0 +1,99 @@
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: uidp-postgres-pv
+  namespace: {{ .Release.Namespace }}
+  labels:
+    type: local
+    app: oneai
+spec:
+  storageClassName: default-storage
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /mnt/data
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: uidp-postgres-pv-claim
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: oneai
+spec:
+  storageClassName: default-storage
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  volumeName: uidp-postgres-pv
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: uidp-postgres-credentials
+  namespace: {{ .Release.Namespace }}
+  app: oneai
+type: Opaque
+data:
+  user: b25lYWlfZGI=
+  password: bGV0bWVpbjEyMw==
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: uidp-postgres
+  namespace: {{ .Release.Namespace }}
+  app: oneai
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: oneai
+    spec:
+      containers:
+        - name: uidp-postgres
+          image: {{ .Values.oneai.releaseRepository }}/uidp-postgres:{{ .Values.oneai.releaseTag }}
+          imagePullPolicy: "IfNotPresent"
+          imagePullSecrets:
+          - name: regcred-{{ .Release.Name }}
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: uidp-postgres-credentials
+                  key: user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: uidp-postgres-credentials
+                  key: password
+            - name: POSTGRES_DB
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: uidp-postgresdb-vol-mount
+      volumes:
+        - name: uidp-postgresdb-vol-mount
+          persistentVolumeClaim:
+            claimName: uidp-postgres-pv-claim
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: uidp-postgres
+  labels:
+    app: oneai
+spec:
+  selector:
+    app: oneai
+    name: uidp-postgres
+  type: NodePort
+  ports:
+   - port: 5432
