@@ -37,31 +37,49 @@ kind: Secret
 metadata:
   name: uidp-postgres-credentials
   namespace: {{ .Release.Namespace }}
-  app: oneai
+  app: postgres
 type: Opaque
 data:
   user: b25lYWlfZGI=
   password: bGV0bWVpbjEyMw==
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: uidp-postgres
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: postgres
+spec:
+  selector:
+    app: postgres
+  type: NodePort
+  ports:
+   - port: 5432
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: uidp-postgres
   namespace: {{ .Release.Namespace }}
-  app: oneai
+  labels:
+    app: postgres
 spec:
+  selector:
+    matchLabels:
+      app: postgres
   replicas: 1
   template:
     metadata:
       labels:
-        app: oneai
+        app: postgres
     spec:
+      imagePullSecrets:
+      - name: regcred-{{ .Release.Name }}
       containers:
         - name: uidp-postgres
           image: {{ .Values.oneai.releaseRepository }}/uidp-postgres:{{ .Values.oneai.releaseTag }}
-          imagePullPolicy: "IfNotPresent"
-          imagePullSecrets:
-          - name: regcred-{{ .Release.Name }}
+          imagePullPolicy: "Always"
           ports:
             - containerPort: 5432
           env:
@@ -83,17 +101,3 @@ spec:
         - name: uidp-postgresdb-vol-mount
           persistentVolumeClaim:
             claimName: uidp-postgres-pv-claim
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: uidp-postgres
-  labels:
-    app: oneai
-spec:
-  selector:
-    app: oneai
-    name: uidp-postgres
-  type: NodePort
-  ports:
-   - port: 5432

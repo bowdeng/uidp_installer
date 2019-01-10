@@ -1,0 +1,38 @@
+{{- if .Values.oneai.defaultData.install }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: "uidp-usecase-init"
+  labels:
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+  annotations:
+    "helm.sh/hook": post-install
+spec:
+  template:
+    metadata:
+      name: "uidp-usecase-init"
+      labels:
+        helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+      - name: regcred-{{ .Release.Name }}
+      containers:
+      - name: usecase-post-install-job
+        image: {{ .Values.oneai.releaseRepository }}/uidp-cp-usecase-service:{{ .Values.oneai.releaseTag }}
+        imagePullPolicy: Always
+        command: ["manage.py migrate"]
+        env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: uidp-postgres-credentials
+                key: user
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: uidp-postgres-credentials
+                key: password
+{{- end }}

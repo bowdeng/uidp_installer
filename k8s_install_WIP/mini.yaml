@@ -1,0 +1,90 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: uidp-minio-pv
+  labels:
+    type: local
+    app: oneai
+spec:
+  storageClassName: default-storage
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio-pv-claim
+  labels:
+    app: minio-storage-claim
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: default-storage
+  volumeName: uidp-minio-pv
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: minio-deployment
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: minio
+    spec:
+      volumes:
+      - name: storage
+        persistentVolumeClaim:
+          claimName: minio-pv-claim
+      containers:
+      - name: minio
+        image: minio/minio
+        args:
+        - server
+        - /storage
+        env:
+        - name: MINIO_ACCESS_KEY
+          value: "letmein123"
+        - name: MINIO_SECRET_KEY
+          value: "letmein123"
+        ports:
+        - containerPort: 9000
+        volumeMounts:
+        - name: storage # must match the volume name, above
+          mountPath: "/storage"
+---
+# UI Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: minio-service
+  annotations:
+    getambassador.io/config: |
+      ---
+      apiVersion: ambassador/v0
+      kind:  Mapping
+      name:  minio-mapping
+      prefix: /media
+      rewrite: /
+      service: minio-service:9000
+      cors:
+        origins: "*"
+        headers: Content-Type, Authorization, Accept
+  labels:
+    app: minio
+spec:
+  selector:
+    app: minio
+  ports:
+  - port: 9000
+    targetPort: 9000
+    name: minio

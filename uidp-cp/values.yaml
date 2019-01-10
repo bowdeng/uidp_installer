@@ -5,6 +5,11 @@ oneai:
   releaseTag: v2
   cloudType: azure  # [ local, azure, aws, gcp ]
   portType: LoadBalancer  # [ LoadBalancer, NodePort ]
+  defaultData:
+    install: false
+  objectstore:
+    install: true
+    flavor: zenko
 
 rbac:
   create: true
