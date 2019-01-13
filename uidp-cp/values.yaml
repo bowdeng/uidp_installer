@@ -1,14 +1,15 @@
 oneai:
-  secureRegistry: true
-  registryKey: "eyJhdXRocyI6eyJ1aWRwcmVnLmF6dXJlY3IuaW8iOnsidXNlcm5hbWUiOiJ1aWRwcmVnIiwicGFzc3dvcmQiOiJLaGZEdD1FPUcwOStQWGtoSW9CV2xXWkQ1MlBLR2VUcCIsImVtYWlsIjoiZ2x5bi5ib3dkZW5AaHBlLmNvbSIsImF1dGgiOiJkV2xrY0hKbFp6cExhR1pFZEQxRlBVY3dPU3RRV0d0b1NXOUNWMnhYV2tRMU1sQkxSMlZVY0E9PSJ9fX0="
-  releaseRepository: uidpreg.azurecr.io
+  secureRegistry: false
+  # registryKey: "eyJhdXRocyI6eyJ1aWRwcmVnLmF6dXJlY3IuaW8iOnsidXNlcm5hbWUiOiJ1aWRwcmVnIiwicGFzc3dvcmQiOiJLaGZEdD1FPUcwOStQWGtoSW9CV2xXWkQ1MlBLR2VUcCIsImVtYWlsIjoiZ2x5bi5ib3dkZW5AaHBlLmNvbSIsImF1dGgiOiJkV2xrY0hKbFp6cExhR1pFZEQxRlBVY3dPU3RRV0d0b1NXOUNWMnhYV2tRMU1sQkxSMlZVY0E9PSJ9fX0="
+  # releaseRepository: uidpreg.azurecr.io
+  releaseRepository: gcr.io/avid-relic-228213
   releaseTag: v2
   cloudType: azure  # [ local, azure, aws, gcp ]
-  portType: LoadBalancer  # [ LoadBalancer, NodePort ]
+  portType: NodePort  # [ LoadBalancer, NodePort ]
   defaultData:
     install: false
   objectstore:
-    install: true
+    install: false
     flavor: zenko
 
 rbac:
