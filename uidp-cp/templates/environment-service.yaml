@@ -53,6 +53,19 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8102
+        env:
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: uidp-postgres-credentials
+                key: user
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: uidp-postgres-credentials
+                key: password
+          - name: POSTGRES_HOST
+            value: uidp-postgres
       {{ if .Values.oneai.secureRegistry -}}
       imagePullSecrets:
       - name: regcred-{{ .Release.Name }}
