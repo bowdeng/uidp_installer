@@ -74,8 +74,10 @@ spec:
       labels:
         app: postgres
     spec:
+      {{ if .Values.oneai.secureRegistry -}}
       imagePullSecrets:
       - name: regcred-{{ .Release.Name }}
+      {{- end }}
       containers:
         - name: uidp-postgres
           image: {{ .Values.oneai.releaseRepository }}/uidp-postgres:{{ .Values.oneai.releaseTag }}

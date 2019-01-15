@@ -45,8 +45,10 @@ spec:
         service: ambassador
     spec:
       serviceAccountName: {{ .Values.rbac.serviceAccounts.oneai.name }}
+      {{ if .Values.oneai.secureRegistry -}}
       imagePullSecrets:
       - name: regcred-{{ .Release.Name }}
+      {{- end }}
       containers:
       - name: ambassador
         image: {{ .Values.oneai.releaseRepository }}/uidp-ambassador:{{ .Values.oneai.releaseTag }}

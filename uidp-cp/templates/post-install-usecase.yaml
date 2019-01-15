@@ -17,8 +17,10 @@ spec:
         helm.sh/chart: "{{.Chart.Name}}-{{.Chart.Version}}"
     spec:
       restartPolicy: Never
+      {{ if .Values.oneai.secureRegistry -}}
       imagePullSecrets:
       - name: regcred-{{ .Release.Name }}
+      {{- end }}
       containers:
       - name: usecase-post-install-job
         image: {{ .Values.oneai.releaseRepository }}/uidp-cp-usecase-service:{{ .Values.oneai.releaseTag }}

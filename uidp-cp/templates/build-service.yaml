@@ -67,6 +67,8 @@ spec:
                 key: password
           - name: POSTGRES_HOST
             value: uidp-postgres
+      {{ if .Values.oneai.secureRegistry -}}
       imagePullSecrets:
       - name: regcred-{{ .Release.Name }}
+      {{- end }}
 ---
