@@ -1,0 +1,126 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: uidp-objstore-data-pv
+  labels:
+    type: local
+    app: oneai
+spec:
+  storageClassName: default-storage
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /mnt/storage/data
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: uidp-objstore-meta-pv
+  labels:
+    type: local
+    app: oneai
+spec:
+  storageClassName: default-storage
+  capacity:
+    storage: 3Gi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: /mnt/storage/meta
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: objstore-meta-pv-claim
+  labels:
+    app: objstore-meta-pv-claim
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: default-storage
+  volumeName: uidp-objstore-meta-pv
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: objstore-data-pv-claim
+  labels:
+    app: objstore-data-pv-claim
+spec:
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 5Gi
+  storageClassName: default-storage
+  volumeName: uidp-objstore-data-pv
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: objstore-deployment
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: objstore
+    spec:
+      volumes:
+      - name: data-volume
+        persistentVolumeClaim:
+          claimName: objstore-data-pv-claim
+      - name: meta-volume
+        persistentVolumeClaim:
+          claimName: objstore-meta-pv-claim
+      containers:
+      - name: objstore
+        image: scality/s3server
+        env:
+        - name: S3DATAPATH
+          value: "/vol/data"
+        - name: S3METADATAPATH
+          value: "/vol/meta"
+        - name: SCALITY_ACCESS_KEY_ID
+          value: "oneaistorage"
+        - name: SCALITY_SECRET_ACCESS_KEY
+          value: "letmein123"
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: data-volume # must match the volume name, above
+          mountPath: "/vol/data"
+        - name: meta-volume
+          mountPath: "/vol/meta"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: objstore-service
+  annotations:
+    getambassador.io/config: |
+      ---
+      apiVersion: ambassador/v0
+      kind:  Mapping
+      name:  objstore-mapping
+      prefix: /storage
+      rewrite: /
+      service: objstore-service:8000
+      cors:
+        origins: "*"
+        headers: Content-Type, Authorization, Accept
+  labels:
+    app: objstore
+spec:
+  selector:
+    app: objstore
+  ports:
+  - port: 8000
+    targetPort: 8000
+    name: objstore
