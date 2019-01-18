@@ -4,16 +4,21 @@ oneai:
   # releaseRepository: uidpreg.azurecr.io
   releaseRepository: gcr.io/avid-relic-228213
   releaseTag: v2
-  cloudType: azure  # [ local, azure, aws, gcp ]
-  portType: NodePort  # [ LoadBalancer, NodePort ]
+  cloudType: local  # [ local, azure, aws, gcp ]
+  portType: LoadBalancer  # [ LoadBalancer, NodePort ]
   defaultData:
     install: false
   objectstore:
     install: false
     flavor: zenko
 
+proxy:
+  httpProxy: ""
+  httpsProxy: ""
+  noProxy: ""
+
 rbac:
-  create: true
+  create: false
   serviceAccounts:
     oneai:
       name: sa-oneai

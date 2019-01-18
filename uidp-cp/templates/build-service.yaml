@@ -54,6 +54,9 @@ spec:
         imagePullPolicy: Always
         ports:
         - containerPort: 8110
+        envFrom:
+          - configMapRef:
+              name: uidp-proxy
         env:
           - name: POSTGRES_USER
             valueFrom:

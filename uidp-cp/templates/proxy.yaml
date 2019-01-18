@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: uidp-proxy
+  namespace: {{ .Release.Namespace }}
+data:
+  HTTP_PROXY: {{ .Values.proxy.httpProxy }}
+  HTTPS_PROXY: {{ .Values.proxy.httpsProxy }}
+  NO_PROXY: {{ .Values.proxy.noProxy }}
