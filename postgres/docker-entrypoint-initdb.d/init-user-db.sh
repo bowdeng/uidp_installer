@@ -35,3 +35,8 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-E
     CREATE DATABASE oai_lifecycle;
     GRANT ALL PRIVILEGES ON DATABASE oai_lifecycle TO oneai_db;
 EOSQL
+
+psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-EOSQL
+    CREATE DATABASE oai_catalog;
+    GRANT ALL PRIVILEGES ON DATABASE oai_catalog TO oneai_db;
+EOSQL
