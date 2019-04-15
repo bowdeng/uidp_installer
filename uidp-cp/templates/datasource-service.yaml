@@ -23,8 +23,8 @@ spec:
   ports:
   - protocol: TCP
     name: datasource-service
-    port: 8104
-    targetPort: 8104
+    port: 8103
+    targetPort: 8103
 ---
 # Use case service deployment
 apiVersion: apps/v1beta2
@@ -53,7 +53,7 @@ spec:
         image: {{ .Values.oneai.releaseRepository }}/uidp-cp-datasource-service:{{ .Values.oneai.releaseTag }}
         imagePullPolicy: Always
         ports:
-        - containerPort: 8104
+        - containerPort: 8103
         env:
           - name: POSTGRES_USER
             valueFrom:
